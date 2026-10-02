@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mercado das Escolhas</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;800;900&family=VT323&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --fundo:#fdf3e1; --tinta:#2b2340; --roxo:#6b4fd8; --roxo-esc:#43309a;
+  --verde:#22a06b; --verde-esc:#15724b; --verm:#e5484d; --verm-esc:#a82c30;
+  --amar:#ffc93c; --amar-esc:#d79b00; --azul:#2d9cdb; --madeira:#b7793f; --madeira-esc:#7b4c22;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;color:var(--tinta);background:var(--fundo);
+  background-image:radial-gradient(#f3dcb6 1.5px,transparent 2px);background-size:22px 22px;min-height:100vh;overflow-x:hidden}
+.wrap{max-width:1150px;margin:0 auto;padding:16px}
+header{text-align:center}
+.tag{display:inline-block;background:var(--roxo);color:#fff;font-weight:900;padding:4px 14px;border-radius:20px;font-size:.85rem;box-shadow:0 3px 0 var(--roxo-esc)}
+h1{font-family:'Baloo 2';font-size:clamp(1.9rem,5.5vw,3rem);line-height:1.1;margin-top:8px}
+.abas{display:flex;justify-content:center;gap:10px;margin:14px 0;flex-wrap:wrap}
+.aba{font:inherit;font-family:'Baloo 2';font-weight:800;font-size:1.1rem;padding:10px 20px;border-radius:16px;border:3px solid var(--tinta);
+  background:#fff;cursor:pointer;box-shadow:0 5px 0 var(--tinta);transition:transform .1s}
+.aba.ativa{background:var(--amar)}
+.aba:active{transform:translateY(3px);box-shadow:0 2px 0 var(--tinta)}
+.tela{display:none}.tela.ativa{display:block;animation:surge .4s}
+@keyframes surge{from{opacity:0;transform:translateY(12px)}}
+.desc{text-align:center;max-width:700px;margin:0 auto 12px;font-size:1.02rem}
+.caixa-borda{background:#fff;border:4px solid var(--tinta);border-radius:22px;box-shadow:0 7px 0 var(--tinta);padding:14px}
+.btn{font:inherit;font-family:'Baloo 2';font-weight:800;font-size:1.1rem;border:3px solid var(--tinta);cursor:pointer;
+  background:var(--verde);color:#fff;padding:9px 20px;border-radius:30px;box-shadow:0 5px 0 var(--tinta)}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--tinta)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.amar{background:var(--amar);color:var(--tinta)} .btn.verm{background:var(--verm)} .btn.roxo{background:var(--roxo)}
+
+/* ============ MERCADO ============ */
+.mercado{display:grid;grid-template-columns:1fr 300px;gap:16px}
+@media(max-width:860px){.mercado{grid-template-columns:1fr}}
+.loja{background:#fff;border:4px solid var(--tinta);border-radius:22px;box-shadow:0 7px 0 var(--tinta);overflow:hidden}
+.fachada{background:repeating-linear-gradient(90deg,var(--verde) 0 36px,#fff 36px 72px);height:40px;border-bottom:4px solid var(--tinta);position:relative}
+.letreiro{position:absolute;left:50%;top:6px;transform:translateX(-50%);background:var(--tinta);color:var(--amar);font-family:'Baloo 2';font-weight:800;
+  padding:2px 16px;border-radius:10px;white-space:nowrap;font-size:1rem}
+.prateleiras{padding:18px 12px 6px;background:#f7efe2}
+.prateleira{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;padding:8px 4px 0;border-bottom:12px solid var(--madeira);
+  box-shadow:0 6px 0 var(--madeira-esc);margin-bottom:22px;min-height:120px;align-items:flex-end}
+.produto{position:relative;width:96px;cursor:pointer;text-align:center;transition:transform .15s;user-select:none;-webkit-tap-highlight-color:transparent}
+.produto:hover{transform:translateY(-6px) rotate(-2deg)}
+.produto.no-carrinho{opacity:.35;transform:none}
+.produto.no-carrinho::after{content:"✔ no carrinho";position:absolute;top:30%;left:0;right:0;font-weight:900;font-size:.75rem;color:var(--verde-esc);background:#fff;border-radius:8px}
+.pack{margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid var(--tinta);color:#fff;position:relative}
+.pack .emo{font-size:1.9rem;line-height:1}
+.pack .marca{font-family:'Baloo 2';font-weight:800;font-size:.68rem;line-height:1;background:rgba(255,255,255,.9);color:var(--tinta);padding:2px 4px;border-radius:5px;margin-top:3px}
+.caixa{width:64px;height:84px;border-radius:6px}
+.caixa::before{content:"";position:absolute;top:-10px;left:6px;right:6px;height:8px;border:3px solid var(--tinta);border-bottom:none;border-radius:4px 4px 0 0;background:inherit}
+.garrafa{width:46px;height:88px;border-radius:14px 14px 10px 10px;margin-top:16px}
+.garrafa::before{content:"";position:absolute;top:-18px;width:18px;height:16px;border:3px solid var(--tinta);border-bottom:none;background:inherit;border-radius:4px 4px 0 0}
+.pacote{width:76px;height:76px;border-radius:10px;clip-path:polygon(0 8%,10% 0,20% 8%,30% 0,40% 8%,50% 0,60% 8%,70% 0,80% 8%,90% 0,100% 8%,100% 100%,0 100%)}
+.bandeja{width:80px;height:58px;border-radius:0 0 20px 20px;background:#fff!important;border-top:none}
+.bandeja .emo{font-size:2.2rem;margin-top:-18px}
+.lata{width:54px;height:74px;border-radius:8px/14px}
+.etiqueta{position:absolute;top:-6px;right:-4px;background:var(--amar);border:2px solid var(--tinta);font-weight:900;font-size:.85rem;
+  padding:1px 7px 1px 12px;border-radius:4px 10px 10px 4px;transform:rotate(12deg);z-index:2;box-shadow:2px 2px 0 var(--tinta)}
+.etiqueta::before{content:"";position:absolute;left:3px;top:50%;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:#fff;border:1px solid var(--tinta)}
+.pnome{font-weight:900;font-size:.78rem;margin-top:4px;line-height:1.1}
+
+.carteira h3,.carrinho h3{font-family:'Baloo 2';font-size:1.25rem}
+.moedas{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin:8px 0}
+.moeda{aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3b0,var(--amar) 45%,var(--amar-esc));border:2px solid #9a6b00;transition:all .35s}
+.moeda.gasta{background:#e9e4da;border-color:#cfc8b8;transform:scale(.7)}
+.saldo{font-family:'Baloo 2';font-weight:800;font-size:1.5rem;text-align:center}
+.saldo.baixo{color:var(--verm);animation:treme .4s}
+.lista{list-style:none;max-height:240px;overflow:auto;margin:8px 0}
+.lista li{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 8px;border-bottom:2px dashed #e6dccb;font-weight:800;font-size:.92rem}
+.lista button{border:none;background:var(--verm);color:#fff;border-radius:50%;width:24px;height:24px;cursor:pointer;font-weight:900}
+.vazio{color:#9a8f80;text-align:center;padding:14px;font-weight:800}
+.dica-dias{background:#eef7ff;border:2px solid var(--azul);border-radius:12px;padding:8px;font-size:.88rem;margin-top:6px}
+.lateral{display:flex;flex-direction:column;gap:14px}
+
+/* tribunal */
+.tribunal{display:none}
+.corte{background:linear-gradient(#7b3f2a,#5a2c1d);border:4px solid var(--tinta);border-radius:22px;box-shadow:0 7px 0 var(--tinta);padding:18px;color:#fff;text-align:center;position:relative;overflow:hidden}
+.corte h2{font-family:'Baloo 2';font-size:clamp(1.5rem,4vw,2.2rem)}
+.juiz{font-size:4.5rem;line-height:1;display:inline-block}
+.martelo{font-size:2.6rem;display:inline-block;transform-origin:80% 80%}
+.martelo.bate{animation:bate .5s}
+@keyframes bate{40%{transform:rotate(-50deg)}60%{transform:rotate(15deg)}}
+.fala-juiz{background:#fff;color:var(--tinta);border-radius:16px;padding:10px 14px;margin:10px auto;max-width:560px;font-weight:800;position:relative}
+.reu{margin:14px auto;background:#fff;color:var(--tinta);border:4px solid var(--amar);border-radius:18px;width:200px;padding:12px;animation:entra .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes entra{from{transform:scale(.5);opacity:0}}
+.reu .produto{margin:10px auto 0;cursor:default}
+.reu .produto:hover{transform:none}
+.botoes-jui{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.bancos{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.banco{border:3px dashed #fff;border-radius:16px;padding:10px;min-height:90px}
+.banco h4{font-family:'Baloo 2';font-size:1.15rem}
+.banco .chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:6px}
+.chip{background:#fff;color:var(--tinta);border-radius:20px;padding:3px 10px;font-weight:800;font-size:.85rem;animation:entra .3s}
+.chip.erro{background:#ffd6d6}
+.relatorio{background:#fff;color:var(--tinta);border-radius:18px;padding:16px;margin-top:14px;text-align:left}
+.barra{height:26px;border-radius:14px;overflow:hidden;display:flex;border:3px solid var(--tinta);margin:8px 0}
+.barra div{display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:.8rem;transition:width 1s}
+
+/* ============ CAIXA ELETRÔNICO ============ */
+.banco-area{display:grid;grid-template-columns:1.1fr 1fr;gap:18px}
+@media(max-width:900px){.banco-area{grid-template-columns:1fr}}
+.cena-atm{position:relative;background:linear-gradient(#cfe8ff 0 70%,#9aa3b5 70%);border:4px solid var(--tinta);border-radius:22px;box-shadow:0 7px 0 var(--tinta);
+  padding:16px 10px 20px;display:flex;justify-content:center;align-items:flex-end;gap:6px;min-height:560px;overflow:hidden}
+.atm{position:relative;width:300px;background:linear-gradient(#3b4a6b,#2a3552);border:4px solid var(--tinta);border-radius:24px 24px 10px 10px;padding:14px;z-index:2}
+.atm-topo{display:flex;align-items:center;justify-content:space-between;color:#fff;font-family:'Baloo 2';font-weight:800;margin-bottom:6px}
+.olhos{display:flex;gap:16px;justify-content:center;margin:2px 0 8px}
+.olho{width:28px;height:28px;background:#fff;border-radius:50%;border:3px solid var(--tinta);position:relative;overflow:hidden}
+.olho::after{content:"";position:absolute;width:12px;height:12px;background:var(--tinta);border-radius:50%;top:8px;left:var(--px,8px);transition:left .3s}
+.olhos.pisca .olho{animation:pisca .25s}
+@keyframes pisca{50%{transform:scaleY(.1)}}
+.visor{background:#0d3b2e;border:4px solid #111;border-radius:12px;min-height:160px;padding:10px;color:#7dffb2;font-family:'VT323',monospace;font-size:1.35rem;line-height:1.15;
+  box-shadow:inset 0 0 18px rgba(0,0,0,.6);position:relative;overflow:hidden}
+.visor::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 2px,transparent 2px 4px);pointer-events:none}
+.visor .sen{font-size:2.2rem;letter-spacing:10px;text-align:center;margin-top:8px}
+.visor.alerta{background:#3b0d12;color:#ffb3b8}
+.visor.premio{background:#3a2a00;color:#ffe27a;animation:pisc 0.6s infinite alternate}
+@keyframes pisc{to{background:#5a4200}}
+.visor .opc{display:flex;gap:6px;margin-top:8px}
+.visor .opc button{flex:1;font-family:'VT323';font-size:1.15rem;border:2px solid currentColor;background:transparent;color:inherit;border-radius:6px;padding:4px;cursor:pointer}
+.boca-atm{height:12px;width:90px;margin:10px auto 6px;background:#111;border-radius:0 0 40px 40px;border:3px solid var(--tinta);transition:all .3s}
+.boca-atm.fala{height:22px}
+.teclado-wrap{position:relative}
+.teclado{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;background:#c8cfdc;border:3px solid var(--tinta);border-radius:12px;padding:10px}
+.tecla{font-family:'Baloo 2';font-weight:800;font-size:1.3rem;border:3px solid var(--tinta);border-radius:10px;background:#fff;padding:6px 0;cursor:pointer;box-shadow:0 4px 0 var(--tinta)}
+.tecla:active{transform:translateY(3px);box-shadow:0 1px 0 var(--tinta)}
+.tecla.c{background:var(--verm);color:#fff}.tecla.ok{background:var(--verde);color:#fff}
+.mao{position:absolute;inset:-6px;display:none;align-items:center;justify-content:center;pointer-events:none;
+  background:rgba(255,201,60,.18);border-radius:14px}
+.mao span{font-size:6rem;transform:rotate(-20deg);filter:drop-shadow(3px 4px 0 rgba(0,0,0,.25))}
+.mao.on{display:flex}
+.cartao-slot{height:10px;width:120px;margin:10px auto 0;background:#111;border-radius:6px}
+.pes{display:flex;justify-content:space-between;padding:0 30px;margin-top:-2px}
+.pes div{width:40px;height:18px;background:#2a3552;border:3px solid var(--tinta);border-top:none;border-radius:0 0 10px 10px}
+
+.bisbilhoteiro{position:absolute;right:4px;bottom:20px;width:150px;text-align:center;z-index:3;transition:transform .4s}
+.bisbilhoteiro.espia{transform:translateX(-36px) rotate(-8deg)}
+.bisbilhoteiro svg{width:120px;height:170px}
+.bis-balao{background:#fff;border:3px solid var(--tinta);border-radius:14px;padding:6px 8px;font-weight:900;font-size:.82rem;margin-bottom:6px;min-height:40px;position:relative}
+.bis-balao::after{content:"";position:absolute;bottom:-11px;left:50%;border:8px solid transparent;border-top-color:var(--tinta)}
+.bis-nome{font-family:'Baloo 2';font-weight:800;font-size:.85rem;background:var(--amar);border:2px solid var(--tinta);border-radius:8px;display:inline-block;padding:0 6px}
+@media(max-width:560px){.bisbilhoteiro{width:110px;right:-6px}.bisbilhoteiro svg{width:90px;height:128px}.atm{width:250px}}
+
+.controles-atm{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.selos{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.selo{border:3px solid var(--tinta);border-radius:14px;padding:6px 10px;font-weight:900;background:#eee;color:#999;font-size:.85rem;transition:all .4s}
+.selo.ganho{background:var(--amar);color:var(--tinta);transform:rotate(-3deg) scale(1.05);box-shadow:0 4px 0 var(--tinta)}
+
+/* painel pix */
+.painel-pix{background:var(--roxo);color:#fff;border:4px solid var(--tinta);border-radius:22px;box-shadow:0 7px 0 var(--tinta);padding:16px}
+.painel-pix h2{font-family:'Baloo 2';font-size:1.6rem;line-height:1.1}
+.painel-pix .sub{opacity:.9;font-size:.92rem}
+.golpes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+@media(max-width:480px){.golpes{grid-template-columns:1fr}}
+.flip{perspective:800px;height:150px;cursor:pointer}
+.flip-in{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d}
+.flip.virado .flip-in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border:3px solid var(--tinta);border-radius:14px;padding:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.frente{background:#fff;color:var(--tinta)}
+.frente .ic{font-size:2.2rem}.frente b{font-family:'Baloo 2';font-size:1rem;line-height:1.1;margin-top:4px}
+.frente small{color:var(--roxo);font-weight:900;font-size:.72rem;margin-top:4px}
+.verso{background:var(--amar);color:var(--tinta);transform:rotateY(180deg);font-size:.82rem;font-weight:800;line-height:1.3}
+.qr-area{display:flex;gap:14px;align-items:center;background:#fff;color:var(--tinta);border:3px solid var(--tinta);border-radius:16px;padding:12px;margin-top:14px}
+.qr-box{width:120px;height:120px;flex-shrink:0;border:3px solid var(--tinta);border-radius:10px;padding:6px;background:#fff;cursor:pointer;position:relative}
+.qr-box img,.qr-box canvas{width:100%!important;height:100%!important}
+.qr-box::after{content:"🔍";position:absolute;right:-12px;bottom:-12px;background:var(--amar);border:2px solid var(--tinta);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center}
+.qr-area h4{font-family:'Baloo 2';font-size:1.1rem;line-height:1.1}
+.qr-area p{font-size:.85rem}
+.quiz-rapido{background:rgba(0,0,0,.2);border-radius:16px;padding:12px;margin-top:14px;text-align:center}
+.quiz-rapido h4{font-family:'Baloo 2';font-size:1.15rem}
+.situacao{background:#fff;color:var(--tinta);border-radius:12px;padding:10px;font-weight:800;margin:8px 0;min-height:64px;display:flex;align-items:center;justify-content:center}
+.quiz-rapido .fb{font-weight:800;min-height:40px;font-size:.9rem;margin-top:6px}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(30,20,50,.7);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal.aberto{display:flex}
+.cartao{background:#fff;border:5px solid var(--tinta);border-radius:24px;max-width:540px;width:100%;padding:22px;box-shadow:0 10px 0 var(--tinta);animation:entra .45s cubic-bezier(.2,1.6,.4,1);max-height:90vh;overflow:auto}
+.cartao h3{font-family:'Baloo 2';font-size:1.6rem;line-height:1.15}
+.cartao ol{padding-left:22px;margin:10px 0}.cartao li{margin:6px 0;font-weight:700}
+.centro{text-align:center}
+@keyframes treme{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.treme{animation:treme .4s}
+.confete{position:fixed;width:10px;height:14px;z-index:60;pointer-events:none;top:-20px}
+.voa-moeda{position:fixed;z-index:45;font-size:1.6rem;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="tag">3ª parte · Presente</span>
+    <h1>Dinheiro no Dia a Dia</h1>
+  </header>
+  <div class="abas">
+    <button class="aba ativa" data-t="t-mercado">🛒 O Mercado das Escolhas</button>
+    <button class="aba" data-t="t-caixa">🏧 O Caixa Eletrônico Humano</button>
+  </div>
+
+  <!-- ================= MERCADO ================= -->
+  <section class="tela ativa" id="t-mercado">
+    <div id="fase-compra">
+      <p class="desc">Bem-vindo à mini-mercearia! 🧺 Você tem <b>30 moedas</b> para o <b>lanche da semana</b> (5 dias de aula). Toque nos produtos para colocar no carrinho. Escolha bem!</p>
+      <div class="mercado">
+        <div class="loja">
+          <div class="fachada"><span class="letreiro">MERCEARIA DA ESQUINA</span></div>
+          <div class="prateleiras" id="prateleiras"></div>
+        </div>
+        <div class="lateral">
+          <div class="caixa-borda carteira">
+            <h3>👛 Sua carteira</h3>
+            <div class="moedas" id="moedas"></div>
+            <div class="saldo" id="saldo">30 moedas</div>
+          </div>
+          <div class="caixa-borda carrinho">
+            <h3>🛒 Carrinho</h3>
+            <ul class="lista" id="lista"></ul>
+            <div class="dica-dias" id="dica-dias">📅 Lembre: são <b>5 dias</b> de lanche!</div>
+            <div class="centro"><button class="btn" id="btn-pagar" style="margin-top:10px" disabled>Pagar e ir ao Tribunal ⚖️</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tribunal" id="fase-tribunal">
+      <div class="corte">
+        <h2>⚖️ Tribunal do Desejo x Necessidade</h2>
+        <div><span class="juiz">🧑🏽‍⚖️</span><span class="martelo" id="martelo">🔨</span></div>
+        <div class="fala-juiz" id="fala-juiz">Ordem no tribunal! Cada item do seu carrinho vai a julgamento. Ele é uma <b>necessidade</b> (o corpo precisa) ou um <b>desejo</b> (é gostoso, mas dá para viver sem)?</div>
+        <div id="area-reu"></div>
+        <div class="bancos">
+          <div class="banco"><h4>🥦 Necessidade</h4><div class="chips" id="banco-nec"></div></div>
+          <div class="banco"><h4>🍭 Desejo</h4><div class="chips" id="banco-des"></div></div>
+        </div>
+        <div id="relatorio"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CAIXA ================= -->
+  <section class="tela" id="t-caixa">
+    <p class="desc">Este caixa eletrônico é meio… <b>humano</b>. Ele tem olhos, boca e adora falar! Digite uma senha de 4 números e veja o que acontece. Será que alguém está olhando? 👀</p>
+    <div class="banco-area">
+      <div>
+        <div class="cena-atm">
+          <div class="atm">
+            <div class="atm-topo"><span>🏦 BANCO DA TURMA</span><span>24h</span></div>
+            <div class="olhos" id="olhos"><div class="olho"></div><div class="olho"></div></div>
+            <div class="visor" id="visor"></div>
+            <div class="boca-atm" id="boca"></div>
+            <div class="teclado-wrap">
+              <div class="teclado" id="teclado"></div>
+              <div class="mao" id="mao"><span>✋</span></div>
+            </div>
+            <div class="cartao-slot"></div>
+          </div>
+          <div class="bisbilhoteiro" id="bis">
+            <div class="bis-balao" id="bis-fala">Hum… o que será que tá digitando? 🤔</div>
+            <svg viewBox="0 0 100 140">
+              <path d="M14 140 q2 -50 36 -52 q34 2 36 52z" fill="#e2563e" stroke="#2b2340" stroke-width="3"/>
+              <circle cx="50" cy="56" r="28" fill="#c98b5e" stroke="#2b2340" stroke-width="3"/>
+              <path d="M22 50 q28 -40 56 0 q-8 -8 -28 -10 q-20 2 -28 10z" fill="#2b2340"/>
+              <circle cx="40" cy="58" r="9" fill="#fff" stroke="#2b2340" stroke-width="2.5"/><circle cx="62" cy="58" r="9" fill="#fff" stroke="#2b2340" stroke-width="2.5"/>
+              <path d="M49 58 h4" stroke="#2b2340" stroke-width="2.5"/>
+              <circle cx="37" cy="59" r="4" fill="#2b2340"/><circle cx="59" cy="59" r="4" fill="#2b2340"/>
+              <path d="M42 74 q8 5 16 0" stroke="#2b2340" stroke-width="3" fill="none"/>
+              <rect x="70" y="92" width="22" height="28" rx="3" fill="#fff" stroke="#2b2340" stroke-width="2.5" transform="rotate(10 80 106)"/>
+              <path d="M74 100 h12 M74 106 h10 M74 112 h12" stroke="#6b4fd8" stroke-width="2" transform="rotate(10 80 106)"/>
+            </svg>
+            <div class="bis-nome">Zé Bisbilhoteiro</div>
+          </div>
+        </div>
+        <div class="controles-atm">
+          <button class="btn amar" id="btn-mao">✋ Cobrir o teclado: NÃO</button>
+          <button class="btn roxo" id="btn-reset-atm">🔄 Recomeçar</button>
+        </div>
+        <div class="selos">
+          <div class="selo" id="selo-mao">🛡️ Escondeu a senha</div>
+          <div class="selo" id="selo-forte">💪 Senha difícil</div>
+          <div class="selo" id="selo-golpe">🧠 Não caiu no golpe</div>
+        </div>
+      </div>
+
+      <aside class="painel-pix">
+        <h2>🚨 Golpes do Pix e Segurança Digital</h2>
+        <p class="sub">Toque nos cartões para descobrir como o golpe funciona e como se proteger.</p>
+        <div class="golpes" id="golpes"></div>
+        <div class="qr-area">
+          <div class="qr-box" id="qr" title="Toque para ver as dicas"></div>
+          <div>
+            <h4>📱 QR code com dicas!</h4>
+            <p>Aponte a câmera do celular ou toque no QR para ler as <b>7 regras de ouro</b>. E lembre: antes de pagar <b>qualquer</b> QR code, confira o nome de quem vai receber!</p>
+          </div>
+        </div>
+        <div class="quiz-rapido">
+          <h4>⚡ Golpe ou Seguro?</h4>
+          <div class="situacao" id="sit"></div>
+          <div style="display:flex;gap:10px;justify-content:center">
+            <button class="btn verm" onclick="respQ(true)">🚨 Golpe</button>
+            <button class="btn" onclick="respQ(false)">✅ Seguro</button>
+          </div>
+          <div class="fb" id="fbq"></div>
+          <div style="font-weight:900">Pontos: <span id="ptq">0</span>/<span id="totq">0</span></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+</div>
+
+<div class="modal" id="modal"><div class="cartao" id="cartao"></div></div>
+
+<script>
+/* ============ UTILIDADES ============ */
+let ac;
+function som(notas,tipo='triangle'){
+  try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+    notas.forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.type=tipo;o.frequency.value=f;
+      const t=ac.currentTime+i*.1;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.2,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.22);
+      o.connect(g).connect(ac.destination);o.start(t);o.stop(t+.25);});}catch(e){}
+}
+function confete(n=80){
+  const cores=['#6b4fd8','#ffc93c','#22a06b','#e5484d','#2d9cdb'];
+  for(let i=0;i<n;i++){const c=document.createElement('div');c.className='confete';c.style.left=Math.random()*100+'vw';c.style.background=cores[i%5];
+    document.body.appendChild(c);c.animate([{transform:'translateY(0)'},{transform:`translateY(${innerHeight+40}px) rotate(${Math.random()*720}deg) translateX(${(Math.random()-.5)*200}px)`}],
+    {duration:1800+Math.random()*1400}).onfinish=()=>c.remove();}
+}
+function treme(el){el.classList.remove('treme');void el.offsetWidth;el.classList.add('treme');}
+function modal(html){document.getElementById('cartao').innerHTML=html;document.getElementById('modal').classList.add('aberto');}
+function fecharModal(){document.getElementById('modal').classList.remove('aberto');}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')fecharModal();});
+
+document.querySelectorAll('.aba').forEach(a=>a.onclick=()=>{
+  document.querySelectorAll('.aba').forEach(x=>x.classList.remove('ativa'));a.classList.add('ativa');
+  document.querySelectorAll('.tela').forEach(t=>t.classList.remove('ativa'));document.getElementById(a.dataset.t).classList.add('ativa');
+});
+
+/* ============ MERCADO ============ */
+const PRODUTOS=[
+ // prateleira 1: frescos
+ {id:'maca',nome:'Maçãs (5)',marca:'Pomar',preco:5,emo:'🍎',forma:'bandeja',cor:'#fff',tipo:'nec',porq:'Fruta dá energia, fibras e vitaminas. O corpo agradece!'},
+ {id:'banana',nome:'Bananas (5)',marca:'Sítio',preco:4,emo:'🍌',forma:'bandeja',cor:'#fff',tipo:'nec',porq:'Banana é barata, nutritiva e já vem com “embalagem”.'},
+ {id:'pao',nome:'Pão integral',marca:'Padoca',preco:5,emo:'🍞',forma:'pacote',cor:'#c98a45',tipo:'nec',porq:'Pão é base de um lanche que sustenta até o recreio acabar.'},
+ {id:'sanduiche',nome:'Sanduíche natural',marca:'Fresquinho',preco:7,emo:'🥪',forma:'caixa',cor:'#7cc576',tipo:'nec',porq:'Refeição completa: tem carboidrato, proteína e verdura.'},
+ // prateleira 2: bebidas
+ {id:'agua',nome:'Água (garrafa)',marca:'Fonte',preco:2,emo:'💧',forma:'garrafa',cor:'#7fc8f8',tipo:'nec',porq:'Água é necessidade número 1. Sem ela, nada funciona!'},
+ {id:'leite',nome:'Leite',marca:'Mimosa',preco:5,emo:'🥛',forma:'caixa',cor:'#4aa3df',tipo:'nec',porq:'Leite tem cálcio e proteína, importante para quem está crescendo.'},
+ {id:'iogurte',nome:'Iogurte',marca:'Cremoso',preco:4,emo:'🍓',forma:'lata',cor:'#f28fb5',tipo:'nec',porq:'Iogurte natural é nutritivo. (Os muito açucarados ficam no limite!)'},
+ {id:'refri',nome:'Refrigerante',marca:'Borbulha',preco:6,emo:'🥤',forma:'garrafa',cor:'#e5484d',tipo:'des',porq:'Gostoso, mas é água com muito açúcar. Dá para viver sem!'},
+ {id:'suco',nome:'Suco de caixinha',marca:'Tropical',preco:3,emo:'🧃',forma:'caixa',cor:'#ffa94d',tipo:'des',porq:'Suco de caixinha costuma ter muito açúcar. Água ou fruta resolvem a sede e a fome.'},
+ // prateleira 3: guloseimas
+ {id:'biscoito',nome:'Biscoito recheado',marca:'Crocks',preco:4,emo:'🍪',forma:'pacote',cor:'#8b5cf6',tipo:'des',porq:'Delícia, mas recheio é praticamente açúcar e gordura.'},
+ {id:'salgadinho',nome:'Salgadinho',marca:'Croc!',preco:5,emo:'🌽',forma:'pacote',cor:'#f59f00',tipo:'des',porq:'Crocante e salgado… e cheio de sódio. Desejo clássico!'},
+ {id:'chocolate',nome:'Chocolate',marca:'Cacau+',preco:5,emo:'🍫',forma:'pacote',cor:'#6b3e26',tipo:'des',porq:'Ninguém precisa de chocolate para viver. Mas como é bom, né?'},
+ {id:'figurinha',nome:'Pacote de figurinhas',marca:'Álbum',preco:6,emo:'⭐',forma:'pacote',cor:'#22a06b',tipo:'des',porq:'Nem é comida! Divertido, mas é desejo puro.'},
+ {id:'chiclete',nome:'Chiclete',marca:'Bola',preco:2,emo:'🫧',forma:'caixa',cor:'#ff6fae',tipo:'des',porq:'Baratinho, mas não alimenta. Desejo!'}
+];
+const PRAT=[[0,1,2,3],[4,5,6,7,8],[9,10,11,12,13]];
+const VERBA=30;
+let carrinho=[];
+
+function packHTML(p){
+  return `<div class="pack ${p.forma}" style="background:${p.cor}"><span class="emo">${p.emo}</span><span class="marca">${p.marca}</span></div>`;
+}
+function montarLoja(){
+  const pr=document.getElementById('prateleiras');
+  pr.innerHTML=PRAT.map(l=>`<div class="prateleira">${l.map(i=>{const p=PRODUTOS[i];
+    return `<div class="produto" id="p-${p.id}" onclick="comprar('${p.id}')"><div class="etiqueta">🪙 ${p.preco}</div>${packHTML(p)}<div class="pnome">${p.nome}</div></div>`}).join('')}</div>`).join('');
+  document.getElementById('moedas').innerHTML=Array.from({length:VERBA},()=>'<div class="moeda"></div>').join('');
+  atualizar();
+}
+function gasto(){return carrinho.reduce((s,id)=>s+PRODUTOS.find(p=>p.id===id).preco,0)}
+function comprar(id){
+  const p=PRODUTOS.find(x=>x.id===id), el=document.getElementById('p-'+id);
+  if(carrinho.includes(id)){remover(id);return;}
+  if(gasto()+p.preco>VERBA){
+    som([200,160],'square'); treme(el); const s=document.getElementById('saldo'); s.classList.add('baixo'); setTimeout(()=>s.classList.remove('baixo'),500);
+    s.textContent=`Faltam ${gasto()+p.preco-VERBA} moedas! 😬`; setTimeout(atualizar,1300); return;
+  }
+  carrinho.push(id); som([660,990]);
+  // moeda voando
+  const a=el.getBoundingClientRect(), b=document.getElementById('moedas').getBoundingClientRect();
+  const m=document.createElement('div');m.className='voa-moeda';m.textContent='🪙';m.style.left=b.left+b.width/2+'px';m.style.top=b.top+'px';document.body.appendChild(m);
+  m.animate([{transform:'translate(0,0) scale(1.4)'},{transform:`translate(${a.left-b.left-b.width/2+30}px,${a.top-b.top}px) scale(.6)`,opacity:.2}],{duration:600,easing:'ease-in'}).onfinish=()=>m.remove();
+  atualizar();
+}
+function remover(id){carrinho=carrinho.filter(x=>x!==id);som([500,350]);atualizar();}
+function atualizar(){
+  const g=gasto(), resto=VERBA-g;
+  document.querySelectorAll('.moeda').forEach((m,i)=>m.classList.toggle('gasta',i>=resto));
+  document.getElementById('saldo').textContent=resto===1?'1 moeda':`${resto} moedas`;
+  PRODUTOS.forEach(p=>document.getElementById('p-'+p.id)?.classList.toggle('no-carrinho',carrinho.includes(p.id)));
+  const l=document.getElementById('lista');
+  l.innerHTML=carrinho.length?carrinho.map(id=>{const p=PRODUTOS.find(x=>x.id===id);return `<li><span>${p.emo} ${p.nome}</span><span>🪙${p.preco} <button onclick="remover('${id}')">×</button></span></li>`}).join(''):'<div class="vazio">Carrinho vazio… 🕸️</div>';
+  document.getElementById('btn-pagar').disabled=!carrinho.length;
+  const dd=document.getElementById('dica-dias');
+  if(resto===0) dd.innerHTML='🎯 Gastou tudo! Será que precisava? Às vezes sobrar moedas é bom!';
+  else if(g>0) dd.innerHTML=`📅 São <b>5 dias</b> de lanche. Gastou <b>${g}</b>, sobram <b>${resto}</b>.`;
+  else dd.innerHTML='📅 Lembre: são <b>5 dias</b> de lanche!';
+}
+document.getElementById('btn-pagar').onclick=()=>{
+  som([523,659,784]);
+  document.getElementById('fase-compra').style.display='none';
+  document.getElementById('fase-tribunal').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+  iniciarTribunal();
+};
+
+/* Tribunal */
+let fila=[], julg={nec:[],des:[]}, acertosT=0;
+function iniciarTribunal(){
+  fila=[...carrinho]; julg={nec:[],des:[]}; acertosT=0;
+  document.getElementById('banco-nec').innerHTML=''; document.getElementById('banco-des').innerHTML=''; document.getElementById('relatorio').innerHTML='';
+  setTimeout(proximoReu,700);
+}
+function proximoReu(){
+  const area=document.getElementById('area-reu');
+  if(!fila.length){area.innerHTML='';veredito();return;}
+  const p=PRODUTOS.find(x=>x.id===fila[0]);
+  document.getElementById('fala-juiz').innerHTML=`Que entre o réu: <b>${p.nome}</b>! Como você o declara?`;
+  area.innerHTML=`<div class="reu"><b>Réu nº ${carrinho.length-fila.length+1}</b><div class="produto">${packHTML(p)}<div class="pnome">${p.nome}</div></div></div>
+   <div class="botoes-jui"><button class="btn" onclick="julgar('nec')">🥦 Necessidade</button><button class="btn amar" onclick="julgar('des')">🍭 Desejo</button></div>`;
+}
+function julgar(esc){
+  const id=fila.shift(), p=PRODUTOS.find(x=>x.id===id), certo=esc===p.tipo;
+  const mt=document.getElementById('martelo'); mt.classList.remove('bate'); void mt.offsetWidth; mt.classList.add('bate');
+  som(certo?[392,523,659]:[300,220],certo?'triangle':'square');
+  if(certo) acertosT++;
+  julg[p.tipo].push(p);
+  document.getElementById('banco-'+p.tipo).insertAdjacentHTML('beforeend',`<span class="chip ${certo?'':'erro'}">${p.emo} ${p.nome}</span>`);
+  document.getElementById('fala-juiz').innerHTML=(certo?'🔨 <b>Bem julgado!</b> ':'🔨 <b>Objeção!</b> O tribunal corrige: é <b>'+(p.tipo==='nec'?'necessidade':'desejo')+'</b>. ')+p.porq;
+  document.getElementById('area-reu').innerHTML=`<div class="centro" style="margin-top:10px"><button class="btn roxo" onclick="proximoReu()">${fila.length?'Próximo réu ➜':'Ouvir o veredito ⚖️'}</button></div>`;
+}
+function veredito(){
+  const gN=julg.nec.reduce((s,p)=>s+p.preco,0), gD=julg.des.reduce((s,p)=>s+p.preco,0), sobra=VERBA-gN-gD;
+  const pN=gN/VERBA*100,pD=gD/VERBA*100,pS=sobra/VERBA*100;
+  let msg;
+  if(gN===0) msg='Hmm… seu lanche da semana foi só de desejos! Gostoso, mas o corpo vai reclamar lá pela quarta-feira. 😅';
+  else if(gD>gN) msg='Você gastou mais com desejos do que com necessidades. Não é proibido curtir, mas primeiro garanta o que precisa!';
+  else if(gD===0) msg='Uau, só necessidades! Muito responsável. E lembre: um pequeno desejo de vez em quando também faz parte. 😉';
+  else msg='Equilíbrio de mestre! Você garantiu o necessário e ainda guardou espaço para um desejo. 👏';
+  document.getElementById('fala-juiz').innerHTML='🔨🔨🔨 <b>O tribunal chegou ao veredito!</b>';
+  document.getElementById('relatorio').innerHTML=`<div class="relatorio">
+    <h3 style="font-family:'Baloo 2'">📜 Sentença final</h3>
+    <div class="barra">
+      ${gN?`<div style="width:${pN}%;background:var(--verde)">${gN}</div>`:''}
+      ${gD?`<div style="width:${pD}%;background:var(--amar-esc)">${gD}</div>`:''}
+      ${sobra?`<div style="width:${pS}%;background:#9a8f80">${sobra}</div>`:''}
+    </div>
+    <p>🟩 Necessidades: <b>${gN}</b> moedas · 🟧 Desejos: <b>${gD}</b> · ⬜ Sobrou: <b>${sobra}</b></p>
+    <p style="margin-top:8px">${msg}</p>
+    ${sobra>0?`<p style="margin-top:6px">💰 As <b>${sobra}</b> moedas que sobraram podem virar <b>poupança</b>, para algo maior no futuro!</p>`:''}
+    <p style="margin-top:6px">🎯 Você acertou <b>${acertosT} de ${carrinho.length}</b> julgamentos.</p>
+    <div class="centro"><button class="btn" style="margin-top:12px" onclick="reiniciarMercado()">🛒 Fazer compras de novo</button></div>
+  </div>`;
+  confete(acertosT===carrinho.length?140:50);
+}
+function reiniciarMercado(){
+  carrinho=[];document.getElementById('fase-tribunal').style.display='none';document.getElementById('fase-compra').style.display='block';
+  document.getElementById('fala-juiz').innerHTML='Ordem no tribunal! Cada item do seu carrinho vai a julgamento. Ele é uma <b>necessidade</b> ou um <b>desejo</b>?';
+  montarLoja();
+}
+
+/* ============ CAIXA ELETRÔNICO ============ */
+let senha='', coberto=false, etapa='senha', selos={};
+const visor=document.getElementById('visor'), bisFala=document.getElementById('bis-fala'), bis=document.getElementById('bis');
+document.getElementById('teclado').innerHTML=['1','2','3','4','5','6','7','8','9','C','0','OK'].map(k=>
+  `<button class="tecla ${k==='C'?'c':k==='OK'?'ok':''}" data-k="${k}">${k}</button>`).join('');
+document.querySelectorAll('.tecla').forEach(t=>t.onclick=()=>tecla(t.dataset.k));
+document.getElementById('btn-mao').onclick=()=>{
+  if(etapa!=='senha') return;
+  coberto=!coberto; document.getElementById('mao').classList.toggle('on',coberto);
+  document.getElementById('btn-mao').textContent='✋ Cobrir o teclado: '+(coberto?'SIM':'NÃO');
+  bisFala.textContent=coberto?'Ah, não! Tem uma mão na frente! 😤':'Oba, dá pra ver tudinho! 😏';
+};
+document.getElementById('btn-reset-atm').onclick=resetATM;
+
+function falaATM(){const b=document.getElementById('boca');b.classList.add('fala');setTimeout(()=>b.classList.remove('fala'),250);}
+function olhar(px){document.querySelectorAll('.olho').forEach(o=>o.style.setProperty('--px',px+'px'));}
+function piscar(){const o=document.getElementById('olhos');o.classList.remove('pisca');void o.offsetWidth;o.classList.add('pisca');}
+setInterval(piscar,3500);
+
+function resetATM(){
+  senha='';etapa='senha';coberto=false;selos={};
+  document.getElementById('mao').classList.remove('on');
+  document.getElementById('btn-mao').textContent='✋ Cobrir o teclado: NÃO';
+  document.querySelectorAll('.selo').forEach(s=>s.classList.remove('ganho'));
+  bis.classList.remove('espia'); bisFala.textContent='Hum… o que será que tá digitando? 🤔';
+  visor.className='visor';
+  visor.innerHTML='OLÁ, HUMANO! 😊<br>INSIRA SUA SENHA<br>DE 4 NÚMEROS:<div class="sen">_ _ _ _</div>';
+  olhar(8);
+}
+function mostraSenha(){
+  const s=senha.split('').map(()=> '*').concat(Array(4-senha.length).fill('_')).join(' ');
+  visor.innerHTML=`DIGITANDO...<div class="sen">${s}</div>`;
+}
+function tecla(k){
+  if(etapa!=='senha') return;
+  som([880],'sine'); falaATM(); olhar(Math.random()*16);
+  if(k==='C'){senha='';mostraSenha();return;}
+  if(k==='OK'){ if(senha.length===4) confirmar(); else {treme(visor);visor.innerHTML='EI! A SENHA TEM<br>4 NÚMEROS! 🙄<div class="sen">'+senha.replace(/./g,'* ')+'</div>';} return;}
+  if(senha.length>=4) return;
+  senha+=k; mostraSenha();
+  if(!coberto){ bis.classList.add('espia'); bisFala.innerHTML=`Anotando… <b>${senha.split('').join(' ')}</b> ✍️`; }
+  else bisFala.textContent=['Não vejo nada! 😩','Tira essa mão! 😠','Que injustiça! 🙈','Droga! 😤'][senha.length-1];
+}
+function fraca(s){
+  if(/^(\d)\1{3}$/.test(s)) return 'todos os números iguais';
+  if('0123456789'.includes(s)) return 'uma sequência (tipo 1234)';
+  if('9876543210'.includes(s)) return 'uma sequência ao contrário';
+  if(/^(19|20)\d\d$/.test(s)) return 'parece um ano (de nascimento?)';
+  if(/^(\d\d)\1$/.test(s)) return 'um par repetido';
+  return null;
+}
+function confirmar(){
+  etapa='analise';
+  const f=fraca(senha);
+  if(coberto){ selos.mao=true; document.getElementById('selo-mao').classList.add('ganho'); }
+  if(!f){ selos.forte=true; document.getElementById('selo-forte').classList.add('ganho'); }
+  if(!coberto){
+    som([300,250,200],'sawtooth');
+    visor.className='visor alerta';
+    visor.innerHTML=`⚠️ ATENÇÃO!<br>SUA SENHA ${senha} FOI<br>VISTA POR ALGUÉM<br>ATRÁS DE VOCÊ! 😱`;
+    bisFala.innerHTML=`Hehe, anotei: <b>${senha}</b>! 📝`;
+  } else {
+    som([523,659,784]);
+    visor.className='visor';
+    visor.innerHTML='✔ SENHA PROTEGIDA!<br>NINGUÉM VIU NADA.<br>MANDOU BEM! 😎';
+    bis.classList.remove('espia'); bisFala.textContent='Não consegui ver nada… vou embora. 😒';
+  }
+  setTimeout(()=>{
+    const titulo=coberto?'🛡️ Mão no teclado: aprovado!':'😱 O Zé Bisbilhoteiro viu tudo!';
+    const txt1=coberto?'Você cobriu o teclado. Isso impede que alguém atrás de você (ou uma câmera escondida) veja sua senha.':'Ele estava espiando por cima do seu ombro e anotou sua senha. Sempre <b>cubra o teclado</b> com a outra mão!';
+    const txt2=f?`<p>🔓 E tem mais: sua senha <b>${senha}</b> é fácil de adivinhar, porque é ${f}. Evite datas de aniversário e sequências!</p>`:`<p>💪 Sua senha <b>${senha}</b> não é óbvia. Ótimo! Só não conte para ninguém, nem para o melhor amigo.</p>`;
+    modal(`<h3>${titulo}</h3><p>${txt1}</p>${txt2}<div class="centro"><button class="btn" onclick="fecharModal();fasePremio()">Continuar ➜</button></div>`);
+  },1600);
+}
+function fasePremio(){
+  etapa='premio';
+  som([784,988,1175,1568]);
+  visor.className='visor premio';
+  visor.innerHTML=`🎉 PARABÉNS!!! 🎉<br>VOCÊ GANHOU R$ 5.000!<br>PARA LIBERAR, FAÇA UM<br>PIX DE R$ 50 AGORA!
+    <div class="opc"><button onclick="premio(true)">FAZER PIX</button><button onclick="premio(false)">DESCONFIAR</button></div>`;
+  bisFala.textContent='Ihhh, que prêmio estranho… 🤨';
+}
+function premio(pagou){
+  etapa='fim'; visor.className='visor';
+  if(!pagou){
+    selos.golpe=true; document.getElementById('selo-golpe').classList.add('ganho');
+    visor.innerHTML='🧠 BOA!<br>ERA UM GOLPE.<br>NINGUÉM DÁ PRÊMIO<br>PEDINDO PIX ANTES!';
+    som([523,659,784,1047]); confete(80);
+  } else {
+    visor.className='visor alerta';
+    visor.innerHTML='💸 OPS... R$ 50 FORAM<br>PARA UM GOLPISTA.<br>E O PRÊMIO? NUNCA<br>EXISTIU. 😢';
+    som([300,220,160],'sawtooth');
+  }
+  const n=Object.keys(selos).length;
+  setTimeout(()=>modal(`<div class="centro"><div style="font-size:3rem">${'🏅'.repeat(n)||'😅'}</div>
+    <h3>${n===3?'Agente de Segurança Nível Máximo!':n===2?'Quase um especialista!':'Hora de treinar mais!'}</h3>
+    <p>Você conquistou <b>${n} de 3</b> selos de segurança.</p>
+    <p style="background:#fff3c9;border-radius:12px;padding:10px;text-align:left">${pagou?'🚩 <b>Regra de ouro:</b> se você precisa <b>pagar</b> para receber um prêmio, é golpe. Prêmio de verdade não cobra taxa por Pix!':'🚩 Você percebeu o sinal: prêmio que você nem disputou + pressa + pedido de Pix = <b>golpe</b>.'}</p>
+    <button class="btn roxo" onclick="fecharModal();resetATM()">🔄 Tentar de novo</button></div>`),1500);
+}
+
+/* Painel de golpes */
+const GOLPES=[
+ {ic:'👵📱',t:'Parente com número novo',v:'“Oi, é a tia! Troquei de número, me faz um Pix urgente?” 👉 Ligue para o número antigo ou faça uma pergunta que só a pessoa real sabe responder.'},
+ {ic:'🔗🎁',t:'Link de promoção falsa',v:'“Celular por R$ 99!” 👉 Não clique em links recebidos por mensagem. Desconfie de preço bom demais e acesse só pelo app ou site oficial.'},
+ {ic:'☎️🏦',t:'Falsa central do banco',v:'“Detectamos uma invasão, passe o código que chegou.” 👉 Banco <b>nunca</b> pede senha, código ou Pix de “teste”. Desligue e ligue você mesmo.'},
+ {ic:'🔲✂️',t:'QR code trocado',v:'Golpistas colam um QR falso por cima do verdadeiro. 👉 Na tela de pagamento, sempre confira o <b>nome</b> de quem vai receber antes de confirmar.'},
+ {ic:'🧾🙃',t:'Comprovante falso',v:'Alguém “paga” e mostra um print. 👉 Só entregue o produto depois de ver o dinheiro <b>no seu extrato</b>, não num print.'},
+ {ic:'🎮💎',t:'Moedas grátis no jogo',v:'“Ganhe diamantes grátis, é só logar aqui!” 👉 É para roubar sua conta. Nunca digite sua senha fora do jogo ou app oficial.'}
+];
+document.getElementById('golpes').innerHTML=GOLPES.map(g=>`<div class="flip" onclick="this.classList.toggle('virado');som([660],'sine')"><div class="flip-in">
+  <div class="face frente"><div class="ic">${g.ic}</div><b>${g.t}</b><small>toque para virar ↻</small></div>
+  <div class="face verso">${g.v}</div></div></div>`).join('');
+
+const DICAS=['Nunca conte sua senha a ninguém.','Cubra o teclado ao digitar a senha.','Banco nunca pede senha, código ou Pix por telefone ou mensagem.','Prêmio que pede pagamento antes é golpe.','Confira o nome de quem vai receber antes de pagar um Pix.','Desconfie de pressa e urgência: golpistas adoram!','Na dúvida, pare e pergunte a um adulto de confiança.'];
+const qrTexto='7 REGRAS DE OURO DA SEGURANCA DIGITAL\n'+DICAS.map((d,i)=>(i+1)+'. '+d.normalize('NFD').replace(/[\u0300-\u036f]/g,'')).join('\n');
+const qr=document.getElementById('qr');
+if(window.QRCode){ new QRCode(qr,{text:qrTexto,width:200,height:200,correctLevel:QRCode.CorrectLevel.L}); }
+else { // QR decorativo de reserva (sem internet)
+  let h='<svg viewBox="0 0 21 21" style="width:100%;height:100%">';
+  for(let y=0;y<21;y++)for(let x=0;x<21;x++){const canto=(x<7&&y<7)||(x>13&&y<7)||(x<7&&y>13);
+    const on=canto?((x%14===0||x%14===6||y%14===0||y%14===6)||((x%14)>1&&(x%14)<5&&(y%14)>1&&(y%14)<5)):Math.random()>.5;
+    if(on)h+=`<rect x="${x}" y="${y}" width="1" height="1"/>`;}
+  qr.innerHTML=h+'</svg>';
+}
+qr.onclick=()=>modal(`<h3>📱 7 regras de ouro da segurança digital</h3><ol>${DICAS.map(d=>`<li>${d}</li>`).join('')}</ol><div class="centro"><button class="btn" onclick="fecharModal()">Entendi! 👍</button></div>`);
+
+/* Quiz golpe ou seguro */
+const SITS=[
+ {s:'📩 SMS: “Sua conta será bloqueada! Clique no link e confirme sua senha.”',g:true,e:'Golpe! Banco não pede senha por link.'},
+ {s:'🧑‍🤝‍🧑 Você faz um Pix para o amigo, ao vivo, e confere o nome dele na tela.',g:false,e:'Seguro! Conferir o nome é o hábito certo.'},
+ {s:'💬 “Mãe, meu celular quebrou, esse é meu número novo. Faz um Pix rapidinho?”',g:true,e:'Golpe clássico! Confirme ligando para o número antigo.'},
+ {s:'🏦 Você abre o app oficial do banco para ver seu extrato.',g:false,e:'Seguro! App oficial é o caminho certo.'},
+ {s:'🎮 “Diamantes grátis! Entre com seu login e senha do jogo neste site.”',g:true,e:'Golpe! Querem roubar sua conta.'},
+ {s:'☎️ “Aqui é do banco. Me diga o código de 6 números que chegou no seu celular.”',g:true,e:'Golpe! Esse código nunca deve ser passado a ninguém.'},
+ {s:'🧾 Comprador manda print do Pix, mas o dinheiro não apareceu no seu extrato. Você espera cair antes de entregar.',g:false,e:'Seguro! Só vale o que aparece no extrato.'}
+].sort(()=>Math.random()-.5);
+let qn=0,pq=0,respondido=false;
+function mostrarSit(){
+  respondido=false;
+  document.getElementById('totq').textContent=SITS.length;
+  if(qn>=SITS.length){document.getElementById('sit').innerHTML=`🏆 Fim! Você acertou ${pq} de ${SITS.length}. ${pq>=6?'Detetive anti-golpe!':'Que tal tentar de novo?'}`;
+    document.getElementById('fbq').innerHTML='<button class="btn amar" onclick="qn=0;pq=0;document.getElementById(\'ptq\').textContent=0;mostrarSit()">Jogar de novo</button>';return;}
+  document.getElementById('sit').textContent=SITS[qn].s; document.getElementById('fbq').textContent='';
+}
+function respQ(golpe){
+  if(respondido||qn>=SITS.length) return; respondido=true;
+  const s=SITS[qn], ok=golpe===s.g;
+  if(ok){pq++;som([660,880]);}else{som([250,190],'square');treme(document.getElementById('sit'));}
+  document.getElementById('ptq').textContent=pq;
+  document.getElementById('fbq').innerHTML=(ok?'✅ ':'❌ ')+s.e;
+  qn++; setTimeout(mostrarSit,2200);
+}
+
+/* início */
+montarLoja(); resetATM(); mostrarSit();
+</script>
+</body>
+</html>
